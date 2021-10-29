@@ -1,2 +1,7 @@
-pywizlight==0.4.12
+<<<<<<< Updated upstream
+pywizlight==0.4.7
 PyYAML
+=======
+pywizlight==0.4.6
+PyYAML
+>>>>>>> Stashed changes

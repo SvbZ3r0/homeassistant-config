@@ -2,8 +2,8 @@
 from datetime import timedelta
 import logging
 
-from pywizlight import PilotBuilder, wizlight
-from pywizlight.bulblibrary import BulbType
+from pywizlight import SCENES, PilotBuilder, wizlight
+from pywizlight.bulblibrary import BulbType, BulbClass
 from pywizlight.exceptions import (
     WizLightConnectionError,
     WizLightNotKnownBulb,
@@ -101,7 +101,7 @@ class WizBulb(LightEntity):
         self._hscolor = None
         self._available = None
         self._effect = None
-        self._scenes: list[str] = []
+        self._scenes = []
         self._bulbtype: BulbType = None
         self._mac = None
 
@@ -192,31 +192,18 @@ class WizBulb(LightEntity):
     @property
     def min_mireds(self):
         """Return the coldest color_temp that this light supports."""
-        if self._bulbtype is None:
-            return color_utils.color_temperature_kelvin_to_mired(6500)
-
-        try:
-            return color_utils.color_temperature_kelvin_to_mired(
-                self._bulbtype.kelvin_range.max
-            )
-
-        except WizLightNotKnownBulb:
-            _LOGGER.info("Kelvin is not present in the library. Fallback to 6500")
-            return color_utils.color_temperature_kelvin_to_mired(6500)
+        if self._bulbtype:
+            return self.kelvin_max_map()
+        # fallback
+        return color_utils.color_temperature_kelvin_to_mired(6500)
 
     @property
     def max_mireds(self):
         """Return the warmest color_temp that this light supports."""
-        if self._bulbtype is None:
-            return color_utils.color_temperature_kelvin_to_mired(2200)
-
-        try:
-            return color_utils.color_temperature_kelvin_to_mired(
-                self._bulbtype.kelvin_range.min
-            )
-        except WizLightNotKnownBulb:
-            _LOGGER.info("Kelvin is not present in the library. Fallback to 2200")
-            return color_utils.color_temperature_kelvin_to_mired(2200)
+        if self._bulbtype:
+            return self.kelvin_min_map()
+        # fallback
+        return color_utils.color_temperature_kelvin_to_mired(2500)
 
     @property
     def supported_features(self) -> int:
@@ -224,7 +211,7 @@ class WizBulb(LightEntity):
         if self._bulbtype:
             return self.featuremap()
         # fallback
-        return SUPPORT_FEATURES_RGB
+        return SUPPORT_BRIGHTNESS | SUPPORT_COLOR | SUPPORT_COLOR_TEMP | SUPPORT_EFFECT
 
     @property
     def effect(self):
@@ -237,6 +224,21 @@ class WizBulb(LightEntity):
 
         URL: https://docs.pro.wizconnected.com/#light-modes
         """
+        if self._bulbtype and len(self._scenes) > 0:
+            # retrun for TW
+            if self._bulbtype.bulb_type == BulbClass.TW:
+                e_list = []
+                for key in [6, 9, 10, 11, 12, 13, 14, 15, 16, 18, 29, 30, 31, 32]:
+                    # Array counting correction
+                    e_list.append(self._scenes[key - 1])
+                return e_list
+            if self._bulbtype.bulb_type == BulbClass.DW:
+                e_list = []
+                for key in [9, 10, 13, 14, 29, 30, 31, 32]:
+                    # Array counting correction
+                    e_list.append(self._scenes[key - 1])
+                return e_list
+            # Must be RGB with all
         return self._scenes
 
     @property
@@ -253,7 +255,7 @@ class WizBulb(LightEntity):
             self.update_temperature()
             self.update_color()
             self.update_effect()
-            await self.update_scene_list()
+            self.update_scene_list()
 
     @property
     def device_info(self):
@@ -328,7 +330,6 @@ class WizBulb(LightEntity):
         """Update the temperature."""
         colortemp = self._light.state.get_colortemp()
         if colortemp is None or colortemp == 0:
-            self._temperature = None
             return
         try:
             _LOGGER.debug(
@@ -344,10 +345,6 @@ class WizBulb(LightEntity):
 
     def update_color(self):
         """Update the hs color."""
-        colortemp = self._light.state.get_colortemp()
-        if colortemp is not None and colortemp != 0:
-            self._hscolor = None
-            return
         if self._light.state.get_rgb() is None:
             return
         try:
@@ -374,25 +371,24 @@ class WizBulb(LightEntity):
 
     async def get_bulb_type(self):
         """Get the bulb type."""
-        if self._bulbtype is not None:
-            return self._bulbtype
+        if self._bulbtype is None:
+            try:
+                self._bulbtype = await self._light.get_bulbtype()
+                _LOGGER.info(
+                    "[wizlight %s] Initiate the WiZ bulb as %s",
+                    self._light.ip,
+                    self._bulbtype.name,
+                )
+            except WizLightTimeOutError:
+                _LOGGER.debug(
+                    "[wizlight %s] Bulbtype update failed - Timeout", self._light.ip
+                )
 
-        try:
-            self._bulbtype = await self._light.get_bulbtype()
-            _LOGGER.info(
-                "[wizlight %s] Initiate the WiZ bulb as %s",
-                self._light.ip,
-                self._bulbtype.name,
-            )
-        except WizLightTimeOutError:
-            _LOGGER.debug(
-                "[wizlight %s] Bulbtype update failed - Timeout", self._light.ip
-            )
-
-    async def update_scene_list(self):
+    def update_scene_list(self):
         """Update the scene list."""
-        _value = await self._light.getSupportedScenes()
-        self._scenes = list(_value.values())
+        self._scenes = []
+        for number in SCENES:
+            self._scenes.append(SCENES[number])
 
     async def get_mac(self):
         """Get the mac from the bulb."""
@@ -416,5 +412,32 @@ class WizBulb(LightEntity):
                 features = features | SUPPORT_COLOR_TEMP
             return features
         except WizLightNotKnownBulb:
-            _LOGGER.info("Bulb is not present in the library. Fallback to full feature")
-            return SUPPORT_FEATURES_RGB
+            _LOGGER.info(
+                "Bulb is not present in the library. Fallback to full feature."
+            )
+            return (
+                SUPPORT_BRIGHTNESS | SUPPORT_COLOR | SUPPORT_COLOR_TEMP | SUPPORT_EFFECT
+            )
+
+    def kelvin_max_map(self):
+        """Map the maximum kelvin from YAML."""
+        # Map features for better reading
+        try:
+            kelvin = color_utils.color_temperature_kelvin_to_mired(
+                self._bulbtype.kelvin_range.max
+            )
+            return kelvin
+        except WizLightNotKnownBulb:
+            _LOGGER.info("Kelvin is not present in the library. Fallback to 6500")
+            return 6500
+
+    def kelvin_min_map(self):
+        """Map the minimum kelvin from YAML."""
+        # Map features for better reading
+        try:
+            return color_utils.color_temperature_kelvin_to_mired(
+                self._bulbtype.kelvin_range.min
+            )
+        except WizLightNotKnownBulb:
+            _LOGGER.info("Kelvin is not present in the library. Fallback to 2500")
+            return 2500
