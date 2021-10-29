@@ -1,0 +1,25 @@
+binary_sensor:
+  - platform: ping
+    host: 1.1.1.1
+    count: 5
+    scan_interval: 5
+    name: "Internet Status"
+#
+# device_tracker:
+#   Deprecated
+#   - platform: nmap_tracker
+#     hosts: 192.168.0.0/24
+#     home_interval: 10
+#     exclude:
+#       - 192.168.0.11
+#       - 192.168.0.12
+#       - 192.168.0.13
+#       - 192.168.0.14
+#       - 192.168.0.15
+#       - 192.168.0.31
+#       - 192.168.0.32
+#       - 192.168.0.33
+#       - 192.168.0.99
+#       - 192.168.0.100
+#       - 192.168.0.101
+#       - 192.168.0.111

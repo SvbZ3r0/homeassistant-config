@@ -1,0 +1,44 @@
+esphome:
+  name: overhead-tank-level
+  platform: ESP8266
+  board: nodemcuv2
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: !secret api_pswd
+  
+ota:
+  password: !secret ota_pswd
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_pswd
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Overhead-Tank-Level"
+    password: !secret ap_pswd
+
+captive_portal:
+
+web_server:
+  port: 80
+
+sensor:
+  - platform: adc
+    pin: A0
+    name: OHT Sensor Voltage
+    id: "OHT_level_sensor_voltage"
+    update_interval: 1s
+    filters:
+    - sliding_window_moving_average:
+        window_size: 15
+        send_every: 1
+  # - platform: template
+  #   name: "Overhead Tank Level"
+  #   lambda: return id("OHT_level_sensor_voltage").state * 2/3.3;
+  #   unit_of_measurement: "m"
+  #   accuracy_decimals: 3

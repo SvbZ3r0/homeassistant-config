@@ -1,0 +1,16 @@
+# sensitive info
+ip_bans.yaml
+secrets.yaml
+**/secrets.yaml
+known_devices.yaml
+.ssh/
+.google.token
+google_calendars.yaml
+
+# unnecessary folders
+.storage/
+.cloud/
+.vscode/
+
+*.log*
+*.db*

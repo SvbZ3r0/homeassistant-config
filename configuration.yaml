@@ -1,0 +1,40 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+# device_tracker:
+# No bluetooth device cuz virtual machine
+#   - platform: bluetooth_tracker
+
+homeassistant:
+  allowlist_external_dirs:
+    - "/config"
+  packages: !include_dir_named packages
+
+lovelace:
+  mode: storage
+  resources:
+    - url: /local/custom-lovelace/weather-card/weather-card.js
+      type: module
+  # Add yaml dashboards
+  dashboards:
+    lovelace-yaml:
+      mode: yaml
+      title: Autogen
+      icon: mdi:script
+      show_in_sidebar: true
+      require_admin: true
+      filename: lovelace.yaml
+
+http:
+  # You must set the trusted proxy IP address so that Home Assistant will properly accept connections
+  # Set this to your NGINX machine IP, or localhost if hosted on the same machine.
+  trusted_proxies: !secret pihole_host
+  use_x_forwarded_for: true
+
+smartir:
+
+stream:

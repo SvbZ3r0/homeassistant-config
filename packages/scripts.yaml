@@ -1,0 +1,44 @@
+script:
+  fade_light:
+    alias: Fade lights In/Out Over Time
+    sequence:
+      - variables:
+          count: "{{ (100 / change_pct|abs)|int }}"
+          transition_time: "{{ (((duration.hours|int * 60) + duration.minutes) * 60) + duration.seconds }}"
+      - repeat:
+          count: "{{ count }}"
+          sequence:
+            - service: light.turn_on
+              data_template:
+                entity_id: "{{ light_entity }}"
+                brightness_step_pct: "{{ change_pct }}"
+                transition: "{{ transition_time }}"
+            - delay:
+                seconds: "{{ transition_time / count }}"
+          # until:
+          #   condition: template
+          #   value_template: "{{ states('{{ light_entity }}','brightness_pct') >= 95 }}"
+
+  flash_light:
+    alias: Flash lights n times
+    sequence:
+      - repeat:
+          count: "{{ count }}"
+          sequence:
+            - service: light.toggle
+              data_template:
+                entity_id: "{{ light_entity }}"
+            - delay:
+                seconds: "{{ wait_time }}"
+
+  flash_window_bulb:
+    alias: test
+    sequence:
+      - service: script.turn_on
+        entity_id: script.flash_light
+        data:
+          variables:
+            light_entity: light.gughan_room_workshop_bulb
+            count: 10
+            # wait_time 0 causes race conditions
+            wait_time: 0.5

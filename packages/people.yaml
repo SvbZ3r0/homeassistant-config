@@ -1,0 +1,32 @@
+sensor:
+  - platform: places
+    name: gughan
+    devicetracker_id: device_tracker.mi_a1
+    options: zone,place
+    map_provider: google
+    home_zone: zone.home
+    api_key: !secret email_osmapi
+
+  - platform: places
+    name: gautam
+    devicetracker_id: device_tracker.mi_a2
+    options: zone,place
+    map_provider: google
+    home_zone: zone.home
+    api_key: !secret email_osmapi
+
+  - platform: places
+    name: shanmugavalli
+    devicetracker_id: device_tracker.redmi_note_9_pro
+    options: zone,place
+    map_provider: google
+    home_zone: zone.home
+    api_key: !secret email_osmapi
+
+  - platform: places
+    name: ravikumar
+    devicetracker_id: device_tracker.mi_a3
+    options: zone,place
+    map_provider: google
+    home_zone: zone.home
+    api_key: !secret email_osmapi

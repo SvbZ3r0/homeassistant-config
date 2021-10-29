@@ -1,0 +1,180 @@
+substitutions:
+  device_name: sonoff_dual_r3_test
+  # device_ap_name: sonoff-dual-r3-test
+  long_devicename: Sonoff DualR3
+
+external_components:
+  - source: github://berfenger/esphome_components
+    components: [ cse7761 ]
+    
+esphome:
+  name: ${device_name}
+  platform: ESP32
+  board: esp32dev
+
+# Enable logging
+logger:
+  baud_rate: 0
+
+wifi:
+  networks:
+  - ssid: !secret wifi_ssid
+    password: !secret wifi_pswd
+    hidden: false
+  manual_ip:
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+    static_ip: 192.168.0.199
+  domain: .local
+  power_save_mode: light
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${device_name}_Hotspot"
+    password: !secret ap_pswd
+
+captive_portal:
+
+# Enable Web server
+web_server:
+  port: 80
+
+# Enable Home Assistant API
+api:
+  password: !secret api_pswd
+
+# Enable Over The Air update
+ota:
+  password: !secret ota_pswd
+
+# enable ble tracking
+esp32_ble_tracker:
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+# uart:
+#   rx_pin: RX
+#   baud_rate: 4800
+
+sensor:
+  # - platform: cse7766  #The actual chip on the DualR3 is a CSE7761, no driver available yet!
+  #   update_interval: 5s
+  #   current:
+  #     name: "$long_devicename Current"
+  #   voltage:
+  #     name: "$long_devicename Voltage"
+  #   power:
+  #     name: "$long_devicename Power"
+  #     id: power
+  #     on_value_range:
+  #       - above: 1.0
+  #         then:
+  #           - logger.log: "$long_devicename Power above 1.0A"
+  #       - below: 1.0
+  #         then:
+  #           - logger.log: "$long_devicename Power below 1.0A"
+  # Extra sensor to keep track of plug uptime
+  - platform: uptime
+    name: ${device_name}_Uptime Sensor
+    filters:
+      - lambda: return x / 3600;
+    unit_of_measurement: "hours"
+    accuracy_decimals: 2
+  # Extra sensor for WiFi signal
+  - platform: wifi_signal
+    name: ${device_name}_WiFi Sensor
+    update_interval: 60s
+
+  - platform: cse7761
+    update_interval: 5s
+    voltage:
+      name: ${long_devicename} CSE7761 Voltage
+    current_1:
+      name: ${long_devicename} CSE7761 Current 1
+    current_2:
+      name: ${long_devicename} CSE7761 Current 2
+    active_power_1:
+      name: ${long_devicename} CSE7761 Active Power 1
+    active_power_2:
+      name: ${long_devicename} CSE7761 Active Power 2
+
+# cse7761 uart port
+uart:
+  tx_pin: GPIO25
+  rx_pin: GPIO26
+  baud_rate: 38400
+  parity: EVEN
+  stop_bits: 1
+
+status_led:
+  pin:
+    number: GPIO13
+    inverted: true
+
+output:
+  - platform: gpio
+    id: ${device_name}_relay_1
+    pin: GPIO27
+  - platform: gpio
+    id: ${device_name}_relay_2
+    pin: GPIO14
+
+switch:
+  - platform: output
+    id: ${device_name}_switch_1
+    name: ${long_devicename} - Switch 1
+    output: ${device_name}_relay_1
+  - platform: output
+    id: ${device_name}_switch_2
+    name: ${long_devicename} - Switch 2
+    output: ${device_name}_relay_2
+
+binary_sensor:
+  - platform: gpio
+    name: Cover Button
+    pin: GPIO00
+    id: reset
+    internal: true
+    filters:
+      - invert:
+      - delayed_off: 10ms
+    on_click:
+      - switch.toggle: 
+          id: ${device_name}_switch_1
+    on_double_click:
+      - switch.toggle: 
+          id: ${device_name}_switch_2
+  - platform: gpio
+    pin:
+      number: GPIO32
+      mode: INPUT_PULLUP
+      inverted: True
+    name: ${long_devicename} Switch 1
+    on_press:
+      then:
+        - switch.turn_on:
+        # - light.toggle:
+            id: ${device_name}_switch_1
+    on_release:
+      then:
+        - switch.turn_off:
+        # - light.toggle: 
+            id: ${device_name}_switch_1
+
+  - platform: gpio
+    pin:
+      number: GPIO33
+      mode: INPUT_PULLUP
+      inverted: True
+    name: ${long_devicename} Switch 2
+    on_press:
+      then:
+        - switch.turn_on:
+        # - light.toggle:
+            id: ${device_name}_switch_2
+    on_release:
+      then:
+        - switch.turn_off:
+        # - light.toggle: 
+            id: ${device_name}_switch_2

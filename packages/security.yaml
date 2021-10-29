@@ -1,0 +1,61 @@
+var:
+  cam_user:
+    initial_value: !secret cam_user
+  cam_pswd:
+    initial_value: !secret cam_pswd
+  cam_ip:
+    initial_value: !secret cam_ip
+
+binary_sensor:
+  - platform: hikvision
+    host: !secret cam_ip
+    port: 80
+    ssl: false
+    username: !secret cam_user
+    password: !secret cam_pswd
+
+camera:
+  - platform: generic
+    still_image_url: http://{{ states('var.cam_ip') }}/ISAPI/Streaming/channels/101/picture
+    stream_source: rtsp://{{ states('var.cam_user') }}:{{ states('var.cam_pswd') }}@{{ states('var.cam_ip') }}:554/Streaming/Channels/001/
+    name: All Cams
+    username: !secret cam_user
+    password: !secret cam_pswd
+    authentication: basic
+    rtsp_transport: tcp
+
+  - platform: generic
+    still_image_url: http://{{ states('var.cam_ip') }}/ISAPI/Streaming/channels/101/picture
+    stream_source: rtsp://{{ states('var.cam_user') }}:{{ states('var.cam_pswd') }}@{{ states('var.cam_ip') }}:554/Streaming/Channels/101/
+    name: Outside Cam
+    username: !secret cam_user
+    password: !secret cam_pswd
+    authentication: basic
+    rtsp_transport: tcp
+
+  - platform: generic
+    still_image_url: "http://{{ states('var.cam_ip') }}/ISAPI/Streaming/channels/201/picture"
+    stream_source: "rtsp://{{ states('var.cam_user') }}:{{ states('var.cam_pswd') }}@{{ states('var.cam_ip') }}:554/Streaming/Channels/201/"
+    name: Portico Cam
+    username: !secret cam_user
+    password: !secret cam_pswd
+    authentication: basic
+    rtsp_transport: tcp
+
+  - platform: generic
+    still_image_url: "http://{{ states('var.cam_ip') }}/ISAPI/Streaming/channels/301/picture"
+    stream_source: "rtsp://{{ states('var.cam_user') }}:{{ states('var.cam_pswd') }}@{{ states('var.cam_ip') }}:554/Streaming/Channels/301/"
+    name: Back Cam
+    username: !secret cam_user
+    password: !secret cam_pswd
+    authentication: basic
+    rtsp_transport: tcp
+
+  - platform: generic
+    still_image_url: "http://{{ states('var.cam_ip') }}/ISAPI/Streaming/channels/401/picture"
+    stream_source: "rtsp://{{ states('var.cam_user') }}:{{ states('var.cam_pswd') }}@{{ states('var.cam_ip') }}:554/Streaming/Channels/401/"
+    name: West Cam
+    username: !secret cam_user
+    password: !secret cam_pswd
+    authentication: basic
+    rtsp_transport: tcp

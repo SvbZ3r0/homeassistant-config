@@ -1,0 +1,101 @@
+var:
+  ssh_id:
+    initial_value: !secret ssh_id
+  ssh_hosts:
+    initial_value: !secret ssh_known_hosts
+  orthanc_host:
+    initial_value: !secret orthanc_host
+
+shell_command:
+  turn_off_orthanc: "ssh -i {{ states('var.ssh_id') }} -o UserKnownHostsFile={{ states('var.ssh_hosts') }} root@orthanc.local poweroff"
+  pihole_turn_off_logging: "ssh -i {{ states('var.ssh_id') }} -o UserKnownHostsFile={{ states('var.ssh_hosts') }} gughan@pi.hole sudo pihole logging off noflush"
+  pihole_turn_on_logging: "ssh -i {{ states('var.ssh_id') }} -o UserKnownHostsFile={{ states('var.ssh_hosts') }} gughan@pi.hole sudo pihole logging on"
+
+sensor:
+  - platform: command_line
+    name: "Orthanc Clocks"
+    command: "ssh -i {{ states('var.ssh_id') }} -o UserKnownHostsFile={{ states('var.ssh_hosts') }} root@orthanc.local grep MHz /proc/cpuinfo"
+
+  - platform: rest
+    name: "Glances Orthanc Uptime"
+    resource: "http://{{ states('var.orthanc_host') }}:61208/api/3/uptime"
+    scan_interval: 30
+
+  - platform: systemmonitor
+    resources:
+      - type: disk_use_percent
+      - type: memory_use_percent
+      - type: swap_use_percent
+      - type: load_1m
+      - type: load_5m
+      - type: load_15m
+      - type: processor_use
+      - type: processor_temperature
+      - type: last_boot
+
+  - platform: uptime
+    name: Uptime
+
+  - platform: filesize
+    file_paths:
+      - /config/home-assistant_v2.db
+      - /config/home-assistant.log
+
+  # - platform: command_line
+  #   name: Pi-Hole
+  #   scan_interval: 10
+  #   command: curl -X GET 'pi.hole/admin/api.php?status'
+  #   value_template: "{{ value_json.status }}"
+
+  - platform: template
+    sensors:
+      orthanc_clock_freq:
+        friendly_name: "Orthanc Clock"
+        unit_of_measurement: "MHz"
+        value_template: >-
+          {% set clocks=states('sensor.orthanc_clocks').replace('\n','').split("cpu MHz\t\t: ")[1:] %}
+          {{ clocks | max | round | int}}
+
+      ha_uptime:
+        friendly_name: "Home Assistant uptime"
+        value_template: >-
+          {% set up_time =  as_timestamp(now()) - as_timestamp(states('sensor.uptime')) %}
+          {% if up_time <= 0 %}
+            Booting up
+          {% else %}
+            {% set minutes = (up_time // 60) | int %}
+            {% set hours = (minutes // 60) %}
+            {% set days = (hours // 24) %}
+            {% set weeks = (days // 7) %}
+            {% set minutes = (minutes % 60) %}
+            {% set hours =  (hours % 24) %}
+            {% set days = (days % 7) %}
+            {% macro phrase(value, name) %}
+                      {%- set value = value %}
+                      {%- set end = 's' if value > 1 else '' %}
+                      {{- '{} {}{}'.format(value, name, end) if value | int > 0 else '' }}
+            {%- endmacro %}
+            {% set text = [ phrase(weeks, 'week'), phrase(days, 'day'), phrase(hours, 'hr'), phrase(minutes, 'min') ] | select('!=','') | list | join(', ') %}
+            {% set last_comma = text.rfind(',') %}
+            {% if last_comma != -1 %}
+              {% set text = text[:last_comma] + ' and' + text[last_comma + 1:] %}
+            {% endif %}
+          {{ text }}
+          {% endif %}
+
+# climate:
+#   - platform: generic_thermostat
+#     name: RPI Cooling Fan Controller
+#     heater: switch.rpi_cooling_fan
+#     target_sensor: sensor.gpu_temperature
+#     min_temp: 37
+#     max_temp: 60
+#     ac_mode: true
+#     target_temp: 40
+#     cold_tolerance: 0.1
+#     hot_tolerance: 0.1
+#     min_cycle_duration:
+#       seconds: 30
+#     keep_alive:
+#       minutes: 5
+#     initial_hvac_mode: "cool"

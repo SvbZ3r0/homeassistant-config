@@ -1,0 +1,75 @@
+light:
+  - platform: group
+    name: Gughan Room Lights
+    entities:
+      - light.gughan_room_window_bulb
+      - light.gughan_room_workshop_light
+      - light.tubelight
+
+climate:
+  - platform: smartir
+    name: Gughan Room AC
+    unique_id: gughan_room_mitsubishi_ac
+    device_code: 1681
+    controller_data: remote.wifi_remote_remote
+    temperature_sensor: sensor.gughan_room_temperature
+    humidity_sensor: sensor.gughan_room_humidity
+    # power_sensor: binary_sensor.ac_power
+
+automation:
+  - id: sunrise_wakeup_alarm
+    alias: Sunrise light alarm
+    description: "Simulate sunrise on the window bulb when I'm home and my alarm rings"
+    trigger:
+      - platform: time
+        at: sensor.mi_a1_next_alarm
+    condition:
+      - condition: state
+        entity_id: person.gughan_ravikumar
+        state: home
+    action:
+      - service: light.turn_on
+        entity_id: light.gughan_room_window_bulb
+        data:
+          color_temp: 370
+          brightness_pct: 10
+      - service: script.turn_on
+        entity_id: script.fade_light
+        data:
+          variables:
+            light_entity: light.gughan_room_window_bulb
+            duration:
+              hours: 1
+              minutes: 30
+              seconds: 0
+            change_pct: 1
+
+  - id: lights_on_media_pause
+    alias: Turn on light when media is paused
+    trigger:
+      platform: state
+      entity_id: media_player.jellyfin_gl65
+      from: playing
+      to: paused
+    condition:
+      - condition: state
+        entity_id: person.gughan_ravikumar
+        state: home
+    action:
+      - service: light.turn_on
+        entity_id: light.gughan_room_window_bulb
+
+  - id: lights_off_media_play
+    alias: Turn off light when media is played
+    trigger:
+      platform: state
+      entity_id: media_player.jellyfin_gl65
+      from: paused
+      to: playing
+    condition:
+      - condition: state
+        entity_id: person.gughan_ravikumar
+        state: home
+    action:
+      - service: light.turn_off
+        entity_id: light.gughan_room_lights
