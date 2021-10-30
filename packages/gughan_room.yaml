@@ -44,6 +44,7 @@ automation:
               seconds: 0
             change_pct: 1
 
+  # Add conditions to exclude songs; and trigger from idle->playing
   - id: lights_on_media_pause
     alias: Turn on light when media is paused
     trigger:
