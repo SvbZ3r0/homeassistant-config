@@ -3,8 +3,8 @@ light:
     name: Gughan Room Lights
     entities:
       - light.gughan_room_window_bulb
-      - light.gughan_room_workshop_light
-      - light.tubelight
+      - light.gughan_room_workshop_bulb
+      - light.gughan_room_tubelight
 
 climate:
   - platform: smartir
@@ -44,7 +44,29 @@ automation:
               seconds: 0
             change_pct: 1
 
-  # Add conditions to exclude songs; and trigger from idle->playing
+  # Add conditions to exclude songs
+  - id: lights_off_media_start
+    alias: Turn off light when media starts playing
+    trigger:
+      platform: state
+      entity_id: media_player.jellyfin_gl65
+      from: idle
+      to: playing
+    condition:
+      - condition: state
+        entity_id: person.gughan_ravikumar
+        state: home
+    action:
+      - service: scene.create
+        data:
+          scene_id: before_media_play
+          snapshot_entities:
+            - light.gughan_room_window_bulb
+            - light.gughan_room_workshop_bulb
+            - light.gughan_room_tubelight
+      - service: light.turn_off
+        entity_id: light.gughan_room_lights
+
   - id: lights_on_media_pause
     alias: Turn on light when media is paused
     trigger:
@@ -74,3 +96,24 @@ automation:
     action:
       - service: light.turn_off
         entity_id: light.gughan_room_lights
+
+  - id: lights_on_media_end
+    alias: Go back to normal when media ends
+    trigger:
+      # to avoid triggering from unknown to idle
+      - platform: state
+        entity_id: media_player.jellyfin_gl65
+        from: playing
+        to: idle
+      - platform: state
+        entity_id: media_player.jellyfin_gl65
+        from: paused
+        to: idle
+    condition:
+      - condition: state
+        entity_id: person.gughan_ravikumar
+        state: home
+    action:
+      - service: scene.turn_on
+        target:
+          entity_id: scene.before_media_play
