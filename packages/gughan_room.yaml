@@ -4,7 +4,7 @@ light:
     entities:
       - light.gughan_room_window_bulb
       - light.gughan_room_workshop_light
-      - light.tubelight
+      - light.gughan_room_tubelight
 
 climate:
   - platform: smartir
