@@ -1,0 +1,84 @@
+vacuum:
+  - platform: miio2
+    host: !secret vacuum_xiaomi_host
+    token: !secret vacuum_xiaomi_token
+    name: Xiaomi Vacuum Mop P
+
+# docker exec homeassistant bash -c "mkdir -p /config/tmp/ && cp /tmp/map_* /config/tmp/"
+camera:
+  - platform: xiaomi_cloud_map_extractor
+    name: Xiaomi Vacuum Map
+    host: !secret vacuum_xiaomi_host
+    token: !secret vacuum_xiaomi_token
+    username: !secret xiaomi_user
+    password: !secret xiaomi_pswd
+    draw:
+      - charger
+      - cleaned_area
+      - goto_path
+      - ignored_obstacles
+      - ignored_obstacles_with_photo
+      - no_go_zones
+      - no_mopping_zones
+      - obstacles
+      - obstacles_with_photo
+      - path
+      - predicted_path
+      - room_names
+      - vacuum_position
+      - virtual_walls
+      - zones
+    colors:
+      color_charger: [200, 0, 0]
+      color_path: [175, 175, 175]
+      color_predicted_path: [255, 255, 255]
+      color_robo: [0, 0, 255]
+      color_scan: [0, 0, 0]
+      color_map_outside: [0, 0, 0]
+      color_map_wall_v2: [0, 0, 0]
+      color_unknown: [0, 0, 0]
+      color_new_discovered_area: [125, 125, 125]
+    room_colors:
+      10: [72, 201, 176]
+      11: [84, 153, 199]
+      12: [133, 193, 233]
+      13: [245, 176, 65]
+    sizes:
+      charger_radius: 50
+      vacuum_radius: 25
+    attributes:
+      - calibration_points
+      - charger
+      - cleaned_rooms
+      - country
+      - goto
+      - goto_path
+      - goto_predicted_path
+      - image
+      - is_empty
+      - map_name
+      - no_go_areas
+      - no_mopping_areas
+      - obstacles
+      - ignored_obstacles
+      - obstacles_with_photo
+      - ignored_obstacles_with_photo
+      - path
+      - room_numbers
+      - rooms
+      - vacuum_position
+      - vacuum_room
+      - vacuum_room_name
+      - walls
+      - zones
+    map_transformation:
+      scale: 10
+      rotate: 180
+      trim:
+        top: 35
+        bottom: 30
+        right: 30
+        left: 35
+    store_map_raw: true
+    store_map_image: true
+    store_map_path: "/tmp"
