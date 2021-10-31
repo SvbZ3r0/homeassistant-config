@@ -12,6 +12,7 @@ google_calendars.yaml
 .cloud/
 .vscode/
 tts/
+tmp/
 
 *.log*
 *.db*
