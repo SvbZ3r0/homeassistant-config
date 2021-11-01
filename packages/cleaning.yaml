@@ -15,15 +15,13 @@ camera:
     draw:
       - charger
       - cleaned_area
-      - goto_path
       - ignored_obstacles
-      - ignored_obstacles_with_photo
       - no_go_zones
       - no_mopping_zones
       - obstacles
-      - obstacles_with_photo
-      - path
-      - predicted_path
+      # - goto_path
+      # - path
+      # - predicted_path
       - room_names
       - vacuum_position
       - virtual_walls
@@ -51,9 +49,6 @@ camera:
       - charger
       - cleaned_rooms
       - country
-      - goto
-      - goto_path
-      - goto_predicted_path
       - image
       - is_empty
       - map_name
@@ -61,16 +56,13 @@ camera:
       - no_mopping_areas
       - obstacles
       - ignored_obstacles
-      - obstacles_with_photo
-      - ignored_obstacles_with_photo
-      - path
-      - room_numbers
-      - rooms
-      - vacuum_position
-      - vacuum_room
-      - vacuum_room_name
-      - walls
-      - zones
+      # - room_numbers
+      # - rooms
+      # - vacuum_position
+      # - vacuum_room
+      # - vacuum_room_name
+      # - walls
+      # - zones
     map_transformation:
       scale: 10
       rotate: 180
@@ -82,3 +74,22 @@ camera:
     store_map_raw: true
     store_map_image: true
     store_map_path: "/tmp"
+
+automation:
+  - id: vacuum_camera_control
+    alias: Vacuum camera control
+    description: "Enable/Disable vacuum camera as needed"
+    trigger:
+      - platform: state
+        entity_id: vacuum.xiaomi_vacuum_mop_p
+    condition:
+      - condition: template
+        value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
+    action:
+      - service: |
+          {% if trigger.to_state.state in ["unavailable", "unknown", "docked"] %}
+            camera.turn_off
+          {% else %}
+            camera.turn_on
+          {% endif %}
+        entity_id: camera.xiaomi_vacuum_map
