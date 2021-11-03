@@ -23,3 +23,22 @@ binary_sensor:
 #       - 192.168.0.100
 #       - 192.168.0.101
 #       - 192.168.0.111
+
+automation:
+  - id: speedtest
+    alias: Call speed test when speed unavailable
+    trigger:
+      - platform: state
+        entity_id:
+          - sensor.speedtest_download
+          - sensor.speedtest_upload
+          - sensor.speedtest_ping
+        to: unavailable
+        for:
+          minutes: 5
+    condition:
+      - condition: state
+        entity_id: binary_sensor.internet_status
+        state: "on"
+    action:
+      - service: speedtestdotnet.speedtest
