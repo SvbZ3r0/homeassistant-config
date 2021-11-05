@@ -14,8 +14,13 @@ ota:
   password: !secret ota_pswd
 
 wifi:
-  ssid: !secret wifi_ssid
+  ssid: !secret wifi_oht_ssid
   password: !secret wifi_pswd
+  manual_ip:
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+    static_ip: 192.168.0.136
+  domain: .local
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
@@ -33,6 +38,7 @@ sensor:
     name: OHT Sensor Voltage
     id: "OHT_level_sensor_voltage"
     update_interval: 1s
+    accuracy_decimals: 4
     filters:
     - sliding_window_moving_average:
         window_size: 15
