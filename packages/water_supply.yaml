@@ -1,0 +1,3 @@
+sensor:
+  - platform: statistics
+    entity_id: sensor.oht_level

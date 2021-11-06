@@ -35,16 +35,20 @@ web_server:
 sensor:
   - platform: adc
     pin: A0
-    name: OHT Sensor Voltage
-    id: "OHT_level_sensor_voltage"
+    name: OHT Level
+    id: "OHT_level_sensor"
     update_interval: 1s
-    accuracy_decimals: 4
+    accuracy_decimals: 0
+    unit_of_measurement: L
+    # need to set device class explicitly
+    # defaults to Voltage otherwise, idk why
+    # maybe cuz it's adc
+    device_class: ""
+    state_class: measurement
     filters:
-    - sliding_window_moving_average:
-        window_size: 15
-        send_every: 1
-  # - platform: template
-  #   name: "Overhead Tank Level"
-  #   lambda: return id("OHT_level_sensor_voltage").state * 2/3.3;
-  #   unit_of_measurement: "m"
-  #   accuracy_decimals: 3
+      - exponential_moving_average:
+          alpha: 0.01
+          send_every: 10
+      - calibrate_linear:
+        - 0.0 -> 0.0
+        - 0.52 -> 8000
