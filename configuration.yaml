@@ -9,10 +9,15 @@ tts:
 # No bluetooth device cuz virtual machine
 #   - platform: bluetooth_tracker
 
+automation: !include automations.yaml
+
 homeassistant:
   allowlist_external_dirs:
     - "/config"
   packages: !include_dir_named packages
+  customize_glob:
+    "light.*_tubelight":
+      icon: mdi:lightbulb-fluorescent-tube
 
 lovelace:
   mode: storage
