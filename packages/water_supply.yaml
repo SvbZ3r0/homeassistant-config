@@ -1,3 +1,31 @@
 sensor:
   - platform: statistics
     entity_id: sensor.oht_level
+
+# create template sensor for daily/weekly water use
+
+# find a way to notify multiple devices that doesn't involve creating a group for every possible combo of devices
+automation:
+  - id: notify_low_oht_water_level
+    alias: Notify when OHT water level is low
+    trigger:
+      - platform: template
+        value_template: "{{ states('sensor.oht_level') | int < 1000 }}"
+        for:
+          minutes: 10
+    condition:
+      - condition: template
+        value_template: "{{ not is_state('sensor.oht_level','unavailable') }}"
+    action:
+      - service: notify.mobile_app_mi_a1
+        data:
+          message: "Overhead tank has only {{ states('sensor.oht_level') }} litres of water"
+          title: Water level low
+      - service: notify.mobile_app_mi_a2
+        data:
+          message: "Overhead tank has only {{ states('sensor.oht_level') }} litres of water"
+          title: Water level low
+      - service: notify.mobile_app_mi_a3
+        data:
+          message: "Overhead tank has only {{ states('sensor.oht_level') }} litres of water"
+          title: Water level low

@@ -31,14 +31,14 @@ script:
             - delay:
                 seconds: "{{ wait_time }}"
 
-  flash_window_bulb:
-    alias: test
-    sequence:
-      - service: script.turn_on
-        entity_id: script.flash_light
-        data:
-          variables:
-            light_entity: light.gughan_room_workshop_bulb
-            count: 10
-            # wait_time 0 causes race conditions
-            wait_time: 0.5
+  # flash_window_bulb:
+  #   alias: test
+  #   sequence:
+  #     - service: script.turn_on
+  #       entity_id: script.flash_light
+  #       data:
+  #         variables:
+  #           light_entity: light.gughan_room_workshop_bulb
+  #           count: 10
+  #           # wait_time 0 causes race conditions
+  #           wait_time: 0.5
