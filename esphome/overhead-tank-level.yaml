@@ -14,7 +14,7 @@ ota:
   password: !secret ota_pswd
 
 wifi:
-  ssid: !secret wifi_oht_ssid
+  ssid: !secret wifi_ext_ssid
   password: !secret wifi_pswd
   manual_ip:
     gateway: 192.168.0.1
