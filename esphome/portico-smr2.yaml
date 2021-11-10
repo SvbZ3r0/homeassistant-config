@@ -1,9 +1,9 @@
 substitutions:
-  device_name: portico_lights_smr2
-  long_device_name: Portico Light SMR2
+  device_name: portico_smr2
+  long_device_name: Portico SMR2
 
 esphome:
-  name: ${device_name}
+  name: portico-smr2
   platform: ESP8266
   board: esp8285
 
@@ -48,14 +48,14 @@ time:
         minutes: 0
         hours: 6
         then:
-          - switch.turn_off:
-              id: ${device_name}_switch
+          - light.turn_off:
+              id: ${device_name}_light
       - seconds: 0
         minutes: 0
         hours: 18
         then:
-          - switch.turn_on:
-              id: ${device_name}_switch
+          - light.turn_on:
+              id: ${device_name}_light
 
 sensor:
 # Extra sensor to keep track of plug uptime
@@ -81,10 +81,10 @@ output:
     id: ${device_name}_relay
     pin: GPIO12
 
-switch:
-  - platform: output
-    id: ${device_name}_switch
-    name: ${long_device_name} Switch
+light:
+  - platform: binary
+    id: ${device_name}_light
+    name: ${long_device_name} Light
     output: ${device_name}_relay
 
 binary_sensor:
@@ -96,8 +96,8 @@ binary_sensor:
       - invert:
       - delayed_off: 10ms
     on_press:
-      - switch.toggle: 
-          id: ${device_name}_switch
+      - light.toggle: 
+          id: ${device_name}_light
 
   - platform: gpio
     name: ${long_device_name} Switch Input
@@ -105,5 +105,5 @@ binary_sensor:
     id: ${device_name}_switch_input
     on_press:
       then:
-        - switch.toggle:
-            id: ${device_name}_switch
+        - light.toggle:
+            id: ${device_name}_light
