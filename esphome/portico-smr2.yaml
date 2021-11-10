@@ -103,7 +103,7 @@ binary_sensor:
     name: ${long_device_name} Switch Input
     pin: GPIO04
     id: ${device_name}_switch_input
-    on_press:
+    on_state:
       then:
         - light.toggle:
             id: ${device_name}_light
