@@ -11,7 +11,7 @@ climate:
     name: Gughan Room AC
     unique_id: gughan_room_mitsubishi_ac
     device_code: 1681
-    controller_data: remote.wifi_remote_remote
+    controller_data: remote.gughan_room_remote
     temperature_sensor: sensor.gughan_room_temperature
     humidity_sensor: sensor.gughan_room_humidity
     # power_sensor: binary_sensor.ac_power
@@ -45,6 +45,7 @@ automation:
             change_pct: 1
 
   # Add conditions to exclude songs
+  # Make this work for generic media players and groups of people
   - id: lights_off_media_start
     alias: Turn off light when media starts playing
     trigger:
@@ -117,3 +118,58 @@ automation:
       - service: scene.turn_on
         target:
           entity_id: scene.before_media_play
+
+  - id: lights_off_nobody
+    alias: Turn lights off when nobody is detected
+    trigger:
+      # no movement inside the romm for 30 minutes
+      - platform: state
+        entity_id: binary_sensor.gughan_room_motion_sensor
+        to: "off"
+        for:
+          minutes: 30
+    action:
+      service: light.turn_off
+      entity_id: light.gughan_room_lights
+
+  # This is pointless cuz the Tuya motion sensor I have responds after 10 seconds
+  # - id: lights_on_motion_detect
+  #   alias: Turn lights on when motion is detected
+  #   trigger:
+  #     - platform: state
+  #       entity_id: binary_sensor.gughan_room_motion_sensor
+  #       to: "on"
+  #   condition:
+  #     # only during daytime
+  #     - condition: time
+  #       after: "07:00:00"
+  #       before: "21:00:00"
+  #     # no light is already turned on
+  #     - condition: state
+  #       entity_id:
+  #         - light.gughan_room_tubelight
+  #         - light.gughan_room_window_bulb
+  #         - light.gughan_room_workshop_bulb
+  #       state: "off"
+  #   action:
+  #     - service: light.turn_on
+  #       entity_id: light.gughan_room_tubelight
+
+  # - id: cool_when_room_too_hot
+  #   this is pointless
+  #   room doesn't stay cold for more than 10 mins
+  #   alias: Cool the room when it gets too hot
+  #   trigger:
+  #     - platform: template
+  #       value_template: "{{ states('sensor.gughan_room_heat_index') | int > 30 }}"
+  #       for:
+  #         minutes: 5
+  #   action:
+  #     - service: climate.turn_on
+  #       target:
+  #         entity_id: climate.gughan_room_ac
+  #     - delay:
+  #         minutes: 15
+  #     - service: climate.turn_off
+  #       target:
+  #         entity_id: climate.gughan_room_ac
