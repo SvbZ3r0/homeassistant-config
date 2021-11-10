@@ -1,5 +1,6 @@
 substitutions:
-  device_name: sonoff_mini_r2_test
+  device_name: portico_lights_smr2
+  long_device_name: Portico Light SMR2
 
 esphome:
   name: ${device_name}
@@ -8,7 +9,7 @@ esphome:
 
 wifi:
   networks:
-  - ssid: !secret wifi_ssid
+  - ssid: !secret wifi_ext_ssid
     password: !secret wifi_pswd
     hidden: false
   manual_ip:
@@ -19,7 +20,7 @@ wifi:
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "${device_name}_Hotspot"
+    ssid: "${long_device_name} AP"
     password: !secret ap_pswd
 
 captive_portal:
@@ -42,11 +43,24 @@ ota:
 time:
   - platform: homeassistant
     id: homeassistant_time
+    on_time:
+      - seconds: 0
+        minutes: 0
+        hours: 6
+        then:
+          - switch.turn_off:
+              id: ${device_name}_switch
+      - seconds: 0
+        minutes: 0
+        hours: 18
+        then:
+          - switch.turn_on:
+              id: ${device_name}_switch
 
 sensor:
 # Extra sensor to keep track of plug uptime
   - platform: uptime
-    name: ${device_name}_Uptime Sensor
+    name: ${long_device_name} Uptime Sensor
     filters:
       - lambda: return x / 3600;
     unit_of_measurement: "hours"
@@ -54,7 +68,7 @@ sensor:
 
 # Extra sensor for WiFi signal
   - platform: wifi_signal
-    name: ${device_name}_WiFi Sensor
+    name: ${long_device_name} WiFi RSSI
     update_interval: 60s
 
 status_led:
@@ -64,14 +78,14 @@ status_led:
 
 output:
   - platform: gpio
-    id: ${device_name}_relay_1
+    id: ${device_name}_relay
     pin: GPIO12
 
-light:
-  - platform: binary
-    id: ${device_name}_light_1
-    name: ${device_name}_Lights
-    output: ${device_name}_relay_1    
+switch:
+  - platform: output
+    id: ${device_name}_switch
+    name: ${long_device_name} Switch
+    output: ${device_name}_relay
 
 binary_sensor:
   - platform: gpio
@@ -82,20 +96,14 @@ binary_sensor:
       - invert:
       - delayed_off: 10ms
     on_press:
-      - light.toggle: 
-          id: ${device_name}_light_1
+      - switch.toggle: 
+          id: ${device_name}_switch
 
   - platform: gpio
-    name: ${device_name}_Lights
+    name: ${long_device_name} Switch Input
     pin: GPIO04
-    id: ${device_name}_switch_1
+    id: ${device_name}_switch_input
     on_press:
       then:
-#        - switch.turn_on:
-        - light.toggle: 
-            id: ${device_name}_light_1
-    on_release:
-      then:
-#        - switch.turn_off:
-        - light.toggle: 
-            id: ${device_name}_light_1
+        - switch.toggle:
+            id: ${device_name}_switch
