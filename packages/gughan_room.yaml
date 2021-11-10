@@ -173,3 +173,43 @@ automation:
   #     - service: climate.turn_off
   #       target:
   #         entity_id: climate.gughan_room_ac
+
+  # convert physical switch change to light change
+  - id: gughan_room_main_light_switch
+    alias: Sync State Gughan Room Main Light
+    description: ""
+    mode: restart
+    max_exceeded: silent
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.gughan_room_main_light_switch_input
+    action:
+      - service: light.toggle
+        data:
+          entity_id: light.gughan_room_tubelight
+
+  - id: gughan_room_workshop_light_switch
+    alias: Sync State Gughan Room Workshop Light
+    description: ""
+    mode: restart
+    max_exceeded: silent
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.gughan_room_workshop_light_switch_input
+    action:
+      - service: light.toggle
+        data:
+          entity_id: light.gughan_room_workshop_bulb
+
+  - id: gughan_room_window_light_switch
+    alias: Sync State Gughan Room Window Light
+    description: ""
+    mode: restart
+    max_exceeded: silent
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.gughan_room_window_light_switch_input
+    action:
+      - service: light.toggle
+        data:
+          entity_id: light.gughan_room_window_bulb
