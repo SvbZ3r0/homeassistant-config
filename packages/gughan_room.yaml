@@ -82,6 +82,9 @@ automation:
     action:
       - service: light.turn_on
         entity_id: light.gughan_room_window_bulb
+        data:
+          brightness: 25
+          color_temp: 370
 
   - id: lights_off_media_play
     alias: Turn off light when media is played
