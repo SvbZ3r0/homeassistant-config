@@ -1,14 +1,14 @@
 substitutions:
-  device_name: sonoff_dual_r3_test
-  # device_ap_name: sonoff-dual-r3-test
-  long_devicename: Sonoff DualR3
+  device_name: gughan_room_bathroom_sdr3
+  device_hostname: gughan-room-bathroom-sdr3
+  long_device_name: Gughan Room Bathroom SDR3
 
 external_components:
   - source: github://berfenger/esphome_components
     components: [ cse7761 ]
     
 esphome:
-  name: ${device_name}
+  name: ${device_hostname}
   platform: ESP32
   board: esp32dev
 
@@ -29,7 +29,7 @@ wifi:
   power_save_mode: light
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "${device_name}_Hotspot"
+    ssid: "${long_device_name} AP"
     password: !secret ap_pswd
 
 captive_portal:
@@ -61,43 +61,43 @@ sensor:
   # - platform: cse7766  #The actual chip on the DualR3 is a CSE7761, no driver available yet!
   #   update_interval: 5s
   #   current:
-  #     name: "$long_devicename Current"
+  #     name: "$long_device_name Current"
   #   voltage:
-  #     name: "$long_devicename Voltage"
+  #     name: "$long_device_name Voltage"
   #   power:
-  #     name: "$long_devicename Power"
+  #     name: "$long_device_name Power"
   #     id: power
   #     on_value_range:
   #       - above: 1.0
   #         then:
-  #           - logger.log: "$long_devicename Power above 1.0A"
+  #           - logger.log: "$long_device_name Power above 1.0A"
   #       - below: 1.0
   #         then:
-  #           - logger.log: "$long_devicename Power below 1.0A"
+  #           - logger.log: "$long_device_name Power below 1.0A"
   # Extra sensor to keep track of plug uptime
   - platform: uptime
-    name: ${device_name}_Uptime Sensor
+    name: ${long_device_name} Uptime Sensor
     filters:
       - lambda: return x / 3600;
     unit_of_measurement: "hours"
     accuracy_decimals: 2
   # Extra sensor for WiFi signal
   - platform: wifi_signal
-    name: ${device_name}_WiFi Sensor
+    name: ${long_device_name} WiFi RSSI
     update_interval: 60s
 
   - platform: cse7761
     update_interval: 5s
     voltage:
-      name: ${long_devicename} CSE7761 Voltage
+      name: ${long_device_name} CSE7761 Voltage
     current_1:
-      name: ${long_devicename} CSE7761 Current 1
+      name: ${long_device_name} CSE7761 Current Light
     current_2:
-      name: ${long_devicename} CSE7761 Current 2
+      name: ${long_device_name} CSE7761 Current Fan
     active_power_1:
-      name: ${long_devicename} CSE7761 Active Power 1
+      name: ${long_device_name} CSE7761 Active Power Light
     active_power_2:
-      name: ${long_devicename} CSE7761 Active Power 2
+      name: ${long_device_name} CSE7761 Active Power Fan
 
 # cse7761 uart port
 uart:
@@ -122,12 +122,12 @@ output:
 
 switch:
   - platform: output
-    id: ${device_name}_switch_1
-    name: ${long_devicename} - Switch 1
+    id: ${device_name}_switch_light
+    name: ${long_device_name} Switch Light
     output: ${device_name}_relay_1
   - platform: output
-    id: ${device_name}_switch_2
-    name: ${long_devicename} - Switch 2
+    id: ${device_name}_switch_fan
+    name: ${long_device_name} Switch Fan 
     output: ${device_name}_relay_2
 
 binary_sensor:
@@ -140,41 +140,31 @@ binary_sensor:
       - invert:
       - delayed_off: 10ms
     on_click:
-      - switch.toggle: 
-          id: ${device_name}_switch_1
+      min_length: 150ms
+      max_length: 500ms
+      then:
+        - switch.toggle: 
+            id: ${device_name}_switch_light
     on_double_click:
       - switch.toggle: 
-          id: ${device_name}_switch_2
+          id: ${device_name}_switch_fan
   - platform: gpio
     pin:
       number: GPIO32
       mode: INPUT_PULLUP
       inverted: True
-    name: ${long_devicename} Switch 1
-    on_press:
+    name: ${long_device_name} Switch Input Light
+    on_state:
       then:
-        - switch.turn_on:
-        # - light.toggle:
-            id: ${device_name}_switch_1
-    on_release:
-      then:
-        - switch.turn_off:
-        # - light.toggle: 
-            id: ${device_name}_switch_1
-
+        - switch.toggle:
+            id: ${device_name}_switch_light
   - platform: gpio
     pin:
       number: GPIO33
       mode: INPUT_PULLUP
       inverted: True
-    name: ${long_devicename} Switch 2
-    on_press:
+    name: ${long_device_name} Switch Input Fan
+    on_state:
       then:
-        - switch.turn_on:
-        # - light.toggle:
-            id: ${device_name}_switch_2
-    on_release:
-      then:
-        - switch.turn_off:
-        # - light.toggle: 
-            id: ${device_name}_switch_2
+        - switch.toggle:
+            id: ${device_name}_switch_fan

@@ -1,0 +1,54 @@
+substitutions:
+  device_name: gughan_room_dht22
+  device_hostname: gughan-room-dht22
+  long_device_name: Gughan Room DHT22
+
+esphome:
+  name: ${device_hostname}
+  platform: ESP8266
+  board: nodemcuv2
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: !secret api_pswd
+
+ota:
+  password: !secret ota_pswd
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_pswd
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${device_hostname} AP"
+    password: !secret ap_pswd
+
+captive_portal:
+
+web_server:
+  port: 80
+
+sensor:
+  - platform: dht
+    model: "DHT22"
+    pin: D2
+    temperature:
+      name: "${long_device_name} Temperature"
+      id: "${device_name}_temperature"
+      unit_of_measurement: "°C"
+    humidity:
+      name: "${long_device_name} Humidity"
+      id: "${device_name}_humidity"
+      unit_of_measurement: "%"
+    update_interval: 2s
+  - platform: template
+    name: "${long_device_name} Heat Index"
+    id: "${device_name}_heat_index"
+    unit_of_measurement: "°C"
+    lambda: return -8.78469475556 + (1.61139411 * id(${device_name}_temperature).state) + (2.33854883889 * id(${device_name}_humidity).state) + (-0.14611605 * id(${device_name}_temperature).state * id(${device_name}_humidity).state) + (-0.012308094 * pow(id(${device_name}_temperature).state, 2)) + (-0.0164248277778 * pow(id(${device_name}_humidity).state, 2)) + (0.002211732 * pow(id(${device_name}_temperature).state, 2) * id(${device_name}_humidity).state) + (0.00072546 * id(${device_name}_temperature).state * pow(id(${device_name}_humidity).state, 2)) + (-0.000003582 * pow(id(${device_name}_temperature).state, 2) * pow(id(${device_name}_humidity).state, 2));
+    update_interval: 2s
+    
