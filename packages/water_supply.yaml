@@ -2,6 +2,15 @@ sensor:
   - platform: statistics
     entity_id: sensor.oht_level
 
+binary_sensor:
+  - platform: trend
+    sensors:
+      oht_level_rising:
+        entity_id: sensor.oht_level
+        max_samples: 30
+        min_gradient: 0.5
+        sample_duration: 300
+
 # create template sensor for daily/weekly water use
 
 # find a way to notify multiple devices that doesn't involve creating a group for every possible combo of devices
@@ -9,6 +18,9 @@ automation:
   - id: notify_low_oht_water_level
     alias: Notify when OHT water level is low
     trigger:
+      # catch 'unavailable' state before it hits the int() casting
+      - platform: template
+        value_template: "{{ is_state('sensor.oht_level','unavailable') }}"
       - platform: template
         value_template: "{{ states('sensor.oht_level') | int < 1000 }}"
         for:
