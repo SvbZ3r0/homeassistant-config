@@ -22,7 +22,7 @@ automation:
     description: "Simulate sunrise on the window bulb when I'm home and my alarm rings"
     trigger:
       - platform: time
-        at: sensor.mi_a1_next_alarm
+        at: sensor.pixel_5a_next_alarm
     condition:
       - condition: state
         entity_id: person.gughan_ravikumar

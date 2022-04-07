@@ -4,13 +4,14 @@ sensor:
       gautam_room_feels_like:
         friendly_name: "Gautam Room Feel's Like"
         unit_of_measurement: "°C"
+        # from Wikipedia
         value_template: >-
           {{ (-8.78469475556 + 
-            (1.61139411 * states('sensor.wifi_remote_temperature') | float) + 
-            (2.33854883889 * states('sensor.wifi_remote_humidity') | float) + 
-            (-0.14611605 * states('sensor.wifi_remote_temperature') | float * states('sensor.wifi_remote_humidity') | float) + 
-            (-0.012308094 * (states('sensor.wifi_remote_temperature') | float)**2) + 
-            (-0.0164248277778 * ((states('sensor.wifi_remote_humidity') | float)**2)) + 
-            (0.002211732 * ((states('sensor.wifi_remote_temperature') | float)**2) * states('sensor.wifi_remote_humidity') | float) + 
-            (0.00072546 * states('sensor.wifi_remote_temperature') | float * ((states('sensor.wifi_remote_humidity') | float)**2)) + 
-            (-0.000003582 * ((states('sensor.wifi_remote_temperature') | float)**2) * ((states('sensor.wifi_remote_humidity') | float)**2))) | round(1) }}
+            (1.61139411 * states('sensor.gughan_room_remote_temperature') | float) + 
+            (2.33854883889 * states('sensor.gughan_room_remote_humidity') | float) + 
+            (-0.14611605 * states('sensor.gughan_room_remote_temperature') | float * states('sensor.gughan_room_remote_humidity') | float) + 
+            (-0.012308094 * (states('sensor.gughan_room_remote_temperature') | float)**2) + 
+            (-0.0164248277778 * ((states('sensor.gughan_room_remote_humidity') | float)**2)) + 
+            (0.002211732 * ((states('sensor.gughan_room_remote_temperature') | float)**2) * states('sensor.gughan_room_remote_humidity') | float) + 
+            (0.00072546 * states('sensor.gughan_room_remote_temperature') | float * ((states('sensor.gughan_room_remote_humidity') | float)**2)) + 
+            (-0.000003582 * ((states('sensor.gughan_room_remote_temperature') | float)**2) * ((states('sensor.gughan_room_remote_humidity') | float)**2))) | round(1) }}

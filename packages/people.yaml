@@ -1,7 +1,7 @@
 sensor:
   - platform: places
     name: gughan
-    devicetracker_id: device_tracker.mi_a1
+    devicetracker_id: device_tracker.pixel_5a
     options: zone,place
     map_provider: google
     home_zone: zone.home
@@ -9,7 +9,7 @@ sensor:
 
   - platform: places
     name: gautam
-    devicetracker_id: device_tracker.mi_a2
+    devicetracker_id: device_tracker.sm-g781b
     options: zone,place
     map_provider: google
     home_zone: zone.home
