@@ -3,9 +3,9 @@ substitutions:
   device_hostname: gughan-room-bathroom-sdr3
   long_device_name: Gughan Room Bathroom SDR3
 
-external_components:
-  - source: github://berfenger/esphome_components
-    components: [ cse7761 ]
+# external_components:
+#   - source: github://berfenger/esphome_components
+#     components: [ cse7761 ]
     
 esphome:
   name: ${device_hostname}
@@ -90,14 +90,45 @@ sensor:
     update_interval: 5s
     voltage:
       name: ${long_device_name} CSE7761 Voltage
+      device_class: voltage
+      state_class: measurement
     current_1:
       name: ${long_device_name} CSE7761 Current Light
+      device_class: current
+      state_class: measurement
     current_2:
       name: ${long_device_name} CSE7761 Current Fan
+      device_class: current
+      state_class: measurement
     active_power_1:
       name: ${long_device_name} CSE7761 Active Power Light
+      id: ${device_name}_power_light
+      unit_of_measurement: W
+      device_class: power
+      state_class: measurement
     active_power_2:
       name: ${long_device_name} CSE7761 Active Power Fan
+      id: ${device_name}_power_fan
+      unit_of_measurement: W
+      device_class: power
+      state_class: measurement
+    
+  - platform: template
+    name: ${long_device_name} Power Consumption
+    id: ${device_name}_power_consumption
+    lambda: return id(${device_name}_power_light).state + id(${device_name}_power_fan).state;
+    unit_of_measurement: W
+    device_class: power
+    state_class: measurement
+  
+  - platform: total_daily_energy
+    name: ${long_device_name} Daily Energy Usage
+    power_id: ${device_name}_power_consumption
+    filters:
+      - multiply: 0.001
+    device_class: energy
+    state_class: total_increasing
+    unit_of_measurement: kWh
 
 # cse7761 uart port
 uart:
