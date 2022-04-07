@@ -1,0 +1,15 @@
+# influxdb:
+#   host: !secret orthanc_host
+#   port: 8086
+#   api_version: 2
+#   ssl: false
+#   token: !secret influxdb_ha_token
+#   organization: !secret influxdb_org_id
+#   bucket: homeassistant
+#   max_retries: 3
+#   precision: s
+#   default_measurement: state
+#   tags:
+#     source: HA
+#   tags_attributes:
+#     - friendly_name
