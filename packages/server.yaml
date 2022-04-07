@@ -7,14 +7,14 @@ var:
     initial_value: !secret orthanc_host
 
 shell_command:
-  turn_off_orthanc: "ssh -i {{ states('var.ssh_id') }} -o UserKnownHostsFile={{ states('var.ssh_hosts') }} root@orthanc.local poweroff"
+  turn_off_orthanc: "ssh -i {{ states('var.ssh_id') }} -o UserKnownHostsFile={{ states('var.ssh_hosts') }} root@192.168.0.111 poweroff"
   pihole_turn_off_logging: "ssh -i {{ states('var.ssh_id') }} -o UserKnownHostsFile={{ states('var.ssh_hosts') }} gughan@pi.hole sudo pihole logging off noflush"
   pihole_turn_on_logging: "ssh -i {{ states('var.ssh_id') }} -o UserKnownHostsFile={{ states('var.ssh_hosts') }} gughan@pi.hole sudo pihole logging on"
 
 sensor:
   - platform: command_line
     name: "Orthanc Clocks"
-    command: "ssh -i {{ states('var.ssh_id') }} -o UserKnownHostsFile={{ states('var.ssh_hosts') }} root@orthanc.local grep MHz /proc/cpuinfo"
+    command: "ssh -i {{ states('var.ssh_id') }} -o UserKnownHostsFile={{ states('var.ssh_hosts') }} root@192.168.0.111 grep MHz /proc/cpuinfo"
 
   - platform: rest
     name: "Glances Orthanc Uptime"
