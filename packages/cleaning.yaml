@@ -70,9 +70,9 @@ camera:
       rotate: 180
       trim:
         top: 35
-        bottom: 30
-        right: 30
-        left: 35
+        bottom: 25
+        right: 31
+        left: 40
     store_map_raw: true
     store_map_image: true
     store_map_path: "/tmp"
