@@ -19,6 +19,32 @@ homeassistant:
     "light.*_tubelight":
       icon: mdi:lightbulb-fluorescent-tube
 
+influxdb:
+  api_version: 2
+  ssl: false
+  host: !secret orthanc_host
+  port: 8086
+  token: !secret influxdb_ha_token
+  organization: !secret influxdb_org_id
+  bucket: Homeassistant
+  tags:
+    source: HA
+  tags_attributes:
+    - friendly_name
+  default_measurement: units
+  include:
+    entities:
+      - weather.home
+      - sensor.oht_level
+    entity_globs:
+      - "sensor.*energy*"
+      - "sensor.*temperature*"
+      - "sensor.*humidity*"
+      - "sensor.*speed*"
+      - "sensor.*usage*"
+      - "sensor.glances*"
+      - "sensor.pihole*"
+
 lovelace:
   mode: storage
   resources:
