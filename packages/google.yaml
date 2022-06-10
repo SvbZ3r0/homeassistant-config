@@ -1,0 +1,10 @@
+# Example configuration.yaml entry
+google_assistant:
+  project_id: home-automation-fa23c
+  service_account: !include home-automation-fa23c-22683269bf4b.json
+  report_state: true
+  exposed_domains:
+    - climate
+    - vacuum
+    - sensor
+    - camera
